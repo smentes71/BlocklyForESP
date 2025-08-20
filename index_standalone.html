@@ -1,1241 +1,571 @@
 <!DOCTYPE html>
-
 <html lang="tr">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width,initial-scale=1" name="viewport"/>
-<title>Blockly Studio • Blockly</title>
-<!-- Blockly -->
-<script src="https://unpkg.com/blockly@10.0.0/blockly.min.js"></script>
-<!-- ICON PACKS -->
-<!-- Tabler Icons (webfont) -->
-<link href="https://unpkg.com/@tabler/icons-webfont@latest/tabler-icons.min.css" rel="stylesheet"/>
-<!-- Material Symbols -->
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@400;600&amp;display=swap" rel="stylesheet"/>
-<!-- Fonts -->
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&amp;family=JetBrains+Mono:wght@400;600&amp;display=swap" rel="stylesheet"/>
-<style>
-    :root{
-      --bg-1:#0b1220; --bg-2:#0f172a; --glass:#0b1220aa; --border:#1f2937;
-      --text:#e5e7eb; --muted:#94a3b8; --accent:#7c3aed; --accent-2:#06b6d4;
-      --ok:#22c55e; --warn:#f59e0b; --err:#ef4444;
-    }
-    *{ box-sizing:border-box }
-    body{
-      margin:0; padding:24px; min-height:100vh; color:var(--text);
-      font-family:"Inter",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-      background:
-        radial-gradient(1200px 600px at 20% -10%, #1e293b55, transparent 60%),
-        radial-gradient(1200px 600px at 120% 110%, #1f1d2b55, transparent 60%),
-        linear-gradient(135deg, var(--bg-1), var(--bg-2));
-    }
-
-    /* Header */
-    .header{
-      display:flex; align-items:center; justify-content:space-between; gap:16px;
-      max-width:1200px; margin:0 auto 18px;
-    }
-    .brand{ display:flex; align-items:center; gap:12px; }
-    .logo{
-      width:28px; height:28px; display:grid; place-items:center;
-      border-radius:8px; background:linear-gradient(180deg,#1e1b4b,#0f172a);
-      border:1px solid #312e81; box-shadow:0 0 18px #7c3aed40 inset;
-      color:#a78bfa;
-    }
-    .brand h1{ margin:0; font-size:20px; font-weight:800; color:#fff; letter-spacing:.2px; }
-    .tag{ font-size:12px; color:var(--muted); margin-top:2px; }
-    .tools{ display:flex; gap:8px; align-items:center; }
-
-    .badge, .toggle{
-      font-size:11px; color:#a1a1aa; border:1px solid var(--border);
-      padding:6px 10px; border-radius:999px; backdrop-filter: blur(6px);
-      background: linear-gradient(180deg, #111827c0, #0b1220c0);
-      display:flex; gap:8px; align-items:center;
-    }
-    .toggle{ cursor:pointer; user-select:none; }
-    .toggle .opt{ opacity:.6; }
-    .toggle .opt.active{ opacity:1; color:#fff; }
-
-    /* Container */
-    .container{
-      max-width:1200px; margin:0 auto; padding:18px 18px 22px;
-      background: linear-gradient(180deg, var(--glass), #05070dcc);
-      border:1px solid var(--border); border-radius:16px;
-      box-shadow: 0 10px 40px #00000060, inset 0 1px 0 #ffffff08;
-      backdrop-filter: blur(10px);
-    }
-    .subtitle{ color:var(--muted); margin:6px 0 14px; font-size:14px; }
-
-    /* Buttons */
-    .controls{ display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin:8px 0 12px; }
-    button{
-      -webkit-tap-highlight-color: transparent;
-      appearance:none; outline:0; border:1px solid #ffffff14;
-      background: linear-gradient(180deg, #1f2937, #0f172a);
-      color:#fff; padding:10px 16px; font-size:14px; font-weight:700;
-      border-radius:12px; letter-spacing:.3px; cursor:pointer;
-      transition: transform .15s ease, box-shadow .2s ease, border-color .2s ease;
-      display:inline-flex; align-items:center; gap:8px;
-    }
-    button:hover{ transform: translateY(-1px); border-color:#ffffff2a; }
-    button:active{ transform: translateY(0); }
-    button.primary{
-      border-color:#6d28d9; background: linear-gradient(180deg, #7c3aed, #5b21b6);
-      box-shadow: 0 0 24px #7c3aed30, inset 0 1px 0 #ffffff33;
-    }
-    button.primary:hover{ box-shadow: 0 0 34px #7c3aed55; }
-    button.ghost{ background: transparent; border-color:#334155; }
-    button.ghost:hover{ border-color:#475569; }
-
-    /* Icon sizes & switching */
-    .icon{ display:inline-flex; width:18px; height:18px; }
-    .ti{ font-size:18px; line-height:1; }  /* Tabler */
-    .material-symbols-outlined{ font-variation-settings: 'wght' 600; font-size:18px; line-height:1; }
-    body.icons-tabler .icon-tabler{ display:inline-flex; }
-    body.icons-tabler .icon-material{ display:none; }
-    body.icons-material .icon-tabler{ display:none; }
-    body.icons-material .icon-material{ display:inline-flex; }
-
-    /* Blockly */
-    #blocklyDiv{
-      height:70vh; width:100%;
-      border-radius:14px; border:1px solid var(--border);
-      background:#0b1220; box-shadow: inset 0 0 0 1px #ffffff05;
-      margin:14px 0;
-    }
-
-    /* Robot / console */
-    .robot-display{
-      background: linear-gradient(180deg, #0b1220, #0a0f1a);
-      border:1px solid var(--border); border-radius:14px; padding:16px; margin:14px 0;
-    }
-    .status{ font-weight:800; font-size:14px; color:#fff; display:flex; align-items:center; gap:8px; }
-    .dot{ width:8px; height:8px; border-radius:999px; background:var(--ok); box-shadow:0 0 10px var(--ok); }
-    .robot-ascii{
-      font-family: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
-      font-size:12px; line-height:1.15; color:#b4c4ff;
-      background:#0b0f18; border:1px dashed #1f2a44;
-      padding:14px; border-radius:10px; margin-top:10px; white-space:pre;
-    }
-    .output{
-      background:#070b12; color:#d1fae5;
-      border:1px solid #0d1420; border-radius:12px; padding:14px; margin-top:14px;
-      font-family:"JetBrains Mono", monospace; font-size:12px; max-height:240px; overflow:auto;
-      box-shadow: inset 0 0 0 1px #ffffff05;
-    }
-    .output strong{ color:#86efac; }
-    .output::-webkit-scrollbar{ height:8px; width:8px; }
-    .output::-webkit-scrollbar-thumb{ background:#1f2937; border-radius:8px; }
-
-    @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
-    .bouncing{ animation: bounce .5s ease-in-out 6; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESP32 Blok Programlama</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .workspace {
+            display: flex;
+            min-height: 600px;
+        }
+        
+        .toolbox {
+            width: 300px;
+            background: #f8f9fa;
+            border-right: 1px solid #dee2e6;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .canvas {
+            flex: 1;
+            padding: 20px;
+            background: #ffffff;
+            position: relative;
+        }
+        
+        .category {
+            margin-bottom: 20px;
+        }
+        
+        .category-title {
+            font-weight: bold;
+            color: #495057;
+            margin-bottom: 10px;
+            padding: 8px 12px;
+            background: #e9ecef;
+            border-radius: 5px;
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .category-title:hover {
+            background: #dee2e6;
+        }
+        
+        .blocks {
+            display: none;
+            padding-left: 10px;
+        }
+        
+        .blocks.active {
+            display: block;
+        }
+        
+        .block {
+            background: #007bff;
+            color: white;
+            padding: 10px 15px;
+            margin: 5px 0;
+            border-radius: 5px;
+            cursor: grab;
+            user-select: none;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+        
+        .block:hover {
+            background: #0056b3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .block:active {
+            cursor: grabbing;
+        }
+        
+        /* Kategori renkleri */
+        .category-basic .block { background: #28a745; }
+        .category-basic .block:hover { background: #1e7e34; }
+        
+        .category-sensors .block { background: #ffc107; color: #212529; }
+        .category-sensors .block:hover { background: #e0a800; }
+        
+        .category-actuators .block { background: #dc3545; }
+        .category-actuators .block:hover { background: #c82333; }
+        
+        .category-communication .block { background: #6f42c1; }
+        .category-communication .block:hover { background: #5a32a3; }
+        
+        .category-touch .block { background: #fd7e14; }
+        .category-touch .block:hover { background: #e8590c; }
+        
+        .dropped-block {
+            position: absolute;
+            background: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: move;
+            user-select: none;
+            border: 2px solid #0056b3;
+            min-width: 120px;
+            text-align: center;
+        }
+        
+        .canvas-grid {
+            background-image: 
+                linear-gradient(rgba(0,0,0,.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,0,0,.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+            min-height: 100%;
+        }
+        
+        .controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+        }
+        
+        .btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            margin: 0 5px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .btn:hover {
+            background: #0056b3;
+        }
+        
+        .btn-success { background: #28a745; }
+        .btn-success:hover { background: #1e7e34; }
+        
+        .btn-danger { background: #dc3545; }
+        .btn-danger:hover { background: #c82333; }
+        
+        .code-output {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border: 2px solid #007bff;
+            border-radius: 10px;
+            padding: 20px;
+            max-width: 80%;
+            max-height: 80%;
+            overflow: auto;
+            z-index: 2000;
+            display: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        .code-output pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+        
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1500;
+            display: none;
+        }
+    </style>
 </head>
-<body class="icons-tabler"><!-- varsayılan: Tabler -->
-<!-- Header -->
-<div class="header">
-<div class="brand">
-<div class="logo">
-<span class="icon icon-tabler"><i class="ti ti-star"></i></span>
-<span class="icon icon-material material-symbols-outlined">star</span>
-</div>
-<div>
-<h1>Blockly Studio</h1>
-<div class="tag">Blockly Development Tool</div>
-</div>
-</div>
-<div class="tools">
-<div class="badge">v1.0</div>
-<div class="toggle" id="iconToggle" title="Icon Pack">
-<span class="opt opt-tabler active">Tabler</span>
-<span>·</span>
-<span class="opt opt-material">Material</span>
-</div>
-</div>
-</div>
-<!-- Main -->
-<div class="container">
-<div class="subtitle">Sade, teknik ve hızlı: blokları birleştir, çalıştır ve sonucu gör.</div>
-<div class="controls">
-<button class="primary" onclick="runCode()">
-<span class="icon icon-tabler"><i class="ti ti-player-play-filled"></i></span>
-<span class="icon icon-material material-symbols-outlined">play_arrow</span>
-        Kodu Çalıştır
-      </button>
-<button class="ghost" onclick="connectRobot()">
-<span class="icon icon-tabler"><i class="ti ti-wifi"></i></span>
-<span class="icon icon-material material-symbols-outlined">wifi</span>
-        Bağlan
-      </button>
-<button class="ghost" onclick="resetRobot()">
-<span class="icon icon-tabler"><i class="ti ti-refresh"></i></span>
-<span class="icon icon-material material-symbols-outlined">refresh</span>
-        Sıfırla
-      </button>
-</div>
-<div id="blocklyDiv"></div>
-<div class="robot-display">
-<div class="status"><span class="dot" id="statusDot"></span><span id="robotStatus">Robot hazır</span></div>
-<div class="robot-ascii" id="robotDisplay"></div>
-</div>
-<div class="output" id="output">
-<strong>Konsol:</strong><br/>
-      [init] Blockly Studio açıldı.
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>ESP32 Blok Programlama Editörü</h1>
+            <p>Sürükle-bırak ile ESP32 kodları oluşturun</p>
+        </div>
+        
+        <div class="workspace">
+            <div class="toolbox">
+                <div class="category category-basic">
+                    <div class="category-title" onclick="toggleCategory(this)">📋 Temel Bloklar</div>
+                    <div class="blocks">
+                        <div class="block" draggable="true">Setup</div>
+                        <div class="block" draggable="true">Loop</div>
+                        <div class="block" draggable="true">Delay</div>
+                        <div class="block" draggable="true">If/Else</div>
+                        <div class="block" draggable="true">While</div>
+                        <div class="block" draggable="true">For</div>
+                        <div class="block" draggable="true">Variable</div>
+                        <div class="block" draggable="true">Function</div>
+                    </div>
+                </div>
+                
+                <div class="category category-sensors">
+                    <div class="category-title" onclick="toggleCategory(this)">🔍 Sensörler</div>
+                    <div class="blocks">
+                        <div class="block" draggable="true">DHT22 Sıcaklık</div>
+                        <div class="block" draggable="true">DHT22 Nem</div>
+                        <div class="block" draggable="true">Ultrasonic Mesafe</div>
+                        <div class="block" draggable="true">LDR Işık</div>
+                        <div class="block" draggable="true">PIR Hareket</div>
+                        <div class="block" draggable="true">Analog Okuma</div>
+                        <div class="block" draggable="true">Digital Okuma</div>
+                    </div>
+                </div>
+                
+                <div class="category category-actuators">
+                    <div class="category-title" onclick="toggleCategory(this)">⚡ Aktüatörler</div>
+                    <div class="blocks">
+                        <div class="block" draggable="true">LED Yak</div>
+                        <div class="block" draggable="true">LED Söndür</div>
+                        <div class="block" draggable="true">Servo Motor</div>
+                        <div class="block" draggable="true">DC Motor</div>
+                        <div class="block" draggable="true">Buzzer</div>
+                        <div class="block" draggable="true">Digital Yazma</div>
+                        <div class="block" draggable="true">Analog Yazma (PWM)</div>
+                    </div>
+                </div>
+                
+                <div class="category category-communication">
+                    <div class="category-title" onclick="toggleCategory(this)">📡 İletişim</div>
+                    <div class="blocks">
+                        <div class="block" draggable="true">Serial Print</div>
+                        <div class="block" draggable="true">WiFi Bağlan</div>
+                        <div class="block" draggable="true">HTTP GET</div>
+                        <div class="block" draggable="true">HTTP POST</div>
+                        <div class="block" draggable="true">MQTT Publish</div>
+                        <div class="block" draggable="true">MQTT Subscribe</div>
+                        <div class="block" draggable="true">Bluetooth Send</div>
+                    </div>
+                </div>
+                
+                <div class="category category-touch">
+                    <div class="category-title" onclick="toggleCategory(this)">👆 Dokunma, Titreşim ve Butonlar</div>
+                    <div class="blocks">
+                        <div class="block" draggable="true">TTP223 Kapasitif Dokunmatik</div>
+                        <div class="block" draggable="true">Piezo Titreşim Sensörü</div>
+                        <div class="block" draggable="true">SW-420 Titreşim Sensörü</div>
+                        <div class="block" draggable="true">Tilt Sensörü (Eğilme)</div>
+                        <div class="block" draggable="true">IR Alıcı (IR Receiver)</div>
+                        <div class="block" draggable="true">Push Button</div>
+                        <div class="block" draggable="true">Toggle Switch</div>
+                        <div class="block" draggable="true">Rotary Encoder</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="canvas">
+                <div class="controls">
+                    <button class="btn btn-success" onclick="generateCode()">🔧 Kod Üret</button>
+                    <button class="btn btn-danger" onclick="clearCanvas()">🗑️ Temizle</button>
+                    <button class="btn" onclick="saveProject()">💾 Kaydet</button>
+                    <button class="btn" onclick="loadProject()">📁 Yükle</button>
+                </div>
+                <div class="canvas-grid" id="canvas"></div>
+            </div>
+        </div>
     </div>
-</div>
-<!-- TOOLBOX: tüm kategoriler -->
-<xml id="toolbox" style="display:none">
-<category colour="#7c3aed" name="PIN">
-<block type="digital_write"></block>
-<block type="digital_read"></block>
-<block type="analog_read"></block>
-<block type="pwm_pin"></block>
-<block type="touch_read"></block>
-<block type="measure_distance"></block>
-<block type="display_set_scl_sda"></block>
-</category>
-<category colour="#60a5fa" name="Zaman">
-<block type="wait"></block>
-<block type="repeat_action"></block>
-<block type="count_with"></block>
-<block type="repeat_times"></block>
-<block type="break_loop"></block>
-<block type="continue_loop"></block>
-<block type="wait_until"></block>
-<block type="while_repeat"></block>
-<block type="repeat_until"></block>
-<block type="forever"></block>
-</category>
-<category colour="#a78bfa" name="Koşul">
-<block type="if_then"></block>
-<block type="if_then_else"></block>
-<block type="if_happy"></block>
-<block type="if_tired"></block>
-</category>
-<category colour="#f43f5e" name="Matematik">
-<block type="math_add"></block>
-<block type="math_subtract"></block>
-<block type="math_multiply"></block>
-<block type="math_number"></block>
-<block type="show_result"></block>
-</category>
-<category colour="#0ea5e9" name="Karşılaştır">
-<block type="math_compare"></block>
-<block type="logic_and"></block>
-<block type="logic_or"></block>
-<block type="logic_not"></block>
-<block type="logic_boolean"></block>
-</category>
-<category colour="#10b981" name="Sensör">
-<block type="read_temperature"></block>
-<block type="read_humidity"></block>
-<block type="read_light_sensor"></block>
-<block type="read_motion_sensor"></block>
-<block type="read_gas_sensor"></block>
-<block type="read_pressure"></block>
-<block type="read_accelerometer"></block>
-<block type="read_gyroscope"></block>
-</category>
-<category colour="#f59e0b" name="🔆 Işık ve Görüntü Sensörleri">
-<block type="ldr_read"></block>
-<block type="tcs34725_color"></block>
-<block type="apds9960_proximity"></block>
-<block type="ir_line_sensor"></block>
-<block type="flame_sensor"></block>
-<block type="camera_capture"></block>
-</category>
-<category colour="#ef4444" name="🌡️ Isı, Nem, Gaz ve Basınç Sensörleri">
-<block type="dht11_read"></block>
-<block type="dht22_read"></block>
-<block type="bmp180_read"></block>
-<block type="bmp280_read"></block>
-<block type="bme280_read"></block>
-<block type="lm35_read"></block>
-<block type="tmp36_read"></block>
-<block type="max31855_read"></block>
-<block type="mq2_read"></block>
-<block type="mq3_read"></block>
-<block type="mq7_read"></block>
-<block type="mq135_read"></block>
-</category>
-<category colour="#06b6d4" name="📍 Mesafe ve Yakınlık Sensörleri">
-  <block type="hc_sr04_distance"></block>
-  <block type="sharp_gp2y0a21_distance"></block>
-  <block type="hlk_ld2410s_human_detect"></block>
-  <block type="hlk_ld2420_human_detect"></block>
-  <block type="tof_vl53l0x_distance"></block>
-  <block type="tof_vl53l1x_distance"></block>
-</category>
+    
+    <div class="overlay" id="overlay" onclick="closeCodeOutput()"></div>
+    <div class="code-output" id="codeOutput">
+        <h3>Üretilen Arduino Kodu</h3>
+        <button class="btn" style="float: right;" onclick="closeCodeOutput()">✖ Kapat</button>
+        <button class="btn btn-success" style="float: right; margin-right: 10px;" onclick="copyCode()">📋 Kopyala</button>
+        <pre id="generatedCode"></pre>
+    </div>
 
-<category colour="#f97316" name="✋ Dokunma, Titreşim ve Butonlar">
-</category>
+    <script>
+        let draggedElement = null;
+        let droppedBlocks = [];
+        let blockCounter = 0;
 
-<category colour="#22c55e" name="⚡ Analog / Dijital Kontrol Sensörleri">
-</category>
+        // Kategori açma/kapama
+        function toggleCategory(element) {
+            const blocks = element.nextElementSibling;
+            blocks.classList.toggle('active');
+        }
 
-<category colour="#3b82f6" name="💡 LED, Ekran ve Görsel Çıkış">
-</category>
+        // Tüm kategorileri aç
+        document.addEventListener('DOMContentLoaded', function() {
+            const categories = document.querySelectorAll('.category-title');
+            categories.forEach(category => {
+                category.nextElementSibling.classList.add('active');
+            });
+        });
 
-<category colour="#a855f7" name="🔊 Sesli Uyarı ve Görsel Efektler">
-</category>
+        // Drag and Drop işlemleri
+        document.addEventListener('dragstart', function(e) {
+            if (e.target.classList.contains('block')) {
+                draggedElement = e.target;
+                e.dataTransfer.effectAllowed = 'copy';
+            }
+        });
 
-<category colour="#ef4444" name="⚙️ Motorlar ve Hareket">
-</category>
+        document.addEventListener('dragover', function(e) {
+            if (e.target.id === 'canvas' || e.target.classList.contains('canvas-grid')) {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'copy';
+            }
+        });
 
-<category colour="#eab308" name="📡 HABERLEŞME MODÜLLERİ">
-</category>
+        document.addEventListener('drop', function(e) {
+            if ((e.target.id === 'canvas' || e.target.classList.contains('canvas-grid')) && draggedElement) {
+                e.preventDefault();
+                
+                const rect = e.target.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                createDroppedBlock(draggedElement.textContent, x, y);
+                draggedElement = null;
+            }
+        });
 
-<category colour="#14b8a6" name="📁 SİSTEMSEL MODÜLLER">
-</category>
+        function createDroppedBlock(text, x, y) {
+            const canvas = document.getElementById('canvas');
+            const block = document.createElement('div');
+            block.className = 'dropped-block';
+            block.textContent = text;
+            block.style.left = x + 'px';
+            block.style.top = y + 'px';
+            block.id = 'block_' + (++blockCounter);
+            
+            // Blok hareket ettirme
+            let isDragging = false;
+            let startX, startY, initialX, initialY;
+            
+            block.addEventListener('mousedown', function(e) {
+                isDragging = true;
+                startX = e.clientX;
+                startY = e.clientY;
+                initialX = parseInt(block.style.left);
+                initialY = parseInt(block.style.top);
+                block.style.zIndex = 1000;
+            });
+            
+            document.addEventListener('mousemove', function(e) {
+                if (isDragging && block) {
+                    const dx = e.clientX - startX;
+                    const dy = e.clientY - startY;
+                    block.style.left = (initialX + dx) + 'px';
+                    block.style.top = (initialY + dy) + 'px';
+                }
+            });
+            
+            document.addEventListener('mouseup', function() {
+                if (isDragging) {
+                    isDragging = false;
+                    block.style.zIndex = 'auto';
+                }
+            });
+            
+            // Çift tıklama ile silme
+            block.addEventListener('dblclick', function() {
+                if (confirm('Bu bloğu silmek istediğinizden emin misiniz?')) {
+                    canvas.removeChild(block);
+                    droppedBlocks = droppedBlocks.filter(b => b.id !== block.id);
+                }
+            });
+            
+            canvas.appendChild(block);
+            droppedBlocks.push({
+                id: block.id,
+                type: text,
+                x: x,
+                y: y,
+                element: block
+            });
+        }
 
-<category colour="#9333ea" name="🧠 YAPAY ZEKA / VERİ ANALİZİ UYUMLU MODÜLLER">
-</category>
+        function clearCanvas() {
+            if (confirm('Tüm blokları silmek istediğinizden emin misiniz?')) {
+                const canvas = document.getElementById('canvas');
+                const blocks = canvas.querySelectorAll('.dropped-block');
+                blocks.forEach(block => canvas.removeChild(block));
+                droppedBlocks = [];
+                blockCounter = 0;
+            }
+        }
 
-</xml>
-<script>
-    /* ===== Icon Pack Toggle ===== */
-    const iconToggle = document.getElementById('iconToggle');
-    const bodyEl = document.body;
-    const tablerOpt = iconToggle.querySelector('.opt-tabler');
-    const materialOpt = iconToggle.querySelector('.opt-material');
-    iconToggle.addEventListener('click', () => {
-      const useMaterial = bodyEl.classList.contains('icons-tabler');
-      bodyEl.classList.toggle('icons-tabler', !useMaterial);
-      bodyEl.classList.toggle('icons-material', useMaterial);
-      tablerOpt.classList.toggle('active', !useMaterial);
-      materialOpt.classList.toggle('active', useMaterial);
-    });
+        function generateCode() {
+            let code = generateArduinoCode();
+            document.getElementById('generatedCode').textContent = code;
+            document.getElementById('overlay').style.display = 'block';
+            document.getElementById('codeOutput').style.display = 'block';
+        }
 
-    /* ===== Tema & Blockly ===== */
-    const coolDark = Blockly.Theme.defineTheme('coolDark', {
-      base: Blockly.Themes.Classic,
-      blockStyles: {
-        colour_blocks: { colourPrimary: '#7c3aed', colourSecondary: '#8b5cf6', colourTertiary: '#581c87' },
-        list_blocks:   { colourPrimary: '#06b6d4', colourSecondary: '#22d3ee', colourTertiary: '#083344' },
-        logic_blocks:  { colourPrimary: '#22c55e' },
-        loop_blocks:   { colourPrimary: '#f59e0b' },
-        math_blocks:   { colourPrimary: '#f43f5e' },
-        text_blocks:   { colourPrimary: '#60a5fa' },
-        variable_blocks:{ colourPrimary: '#a3e635' },
-        procedure_blocks:{ colourPrimary: '#e879f9' }
-      },
-      categoryStyles: {
-        colour_category: { colour: '#7c3aed' },
-        list_category:   { colour: '#06b6d4' },
-        logic_category:  { colour: '#22c55e' },
-        loop_category:   { colour: '#f59e0b' },
-        math_category:   { colour: '#f43f5e' },
-        text_category:   { colour: '#60a5fa' },
-        variable_category:{ colour: '#a3e635' },
-        procedure_category:{ colour: '#e879f9' }
-      },
-      componentStyles: {
-        workspaceBackgroundColour: '#0b1220',
-        toolboxBackgroundColour: '#0b1220',
-        toolboxForegroundColour: '#cbd5e1',
-        flyoutBackgroundColour: '#0b1220',
-        flyoutForegroundColour: '#e5e7eb',
-        flyoutOpacity: 0.95,
-        scrollbarColour: '#334155',
-        scrollbarOpacity: 0.6,
-        insertionMarkerColour: '#06b6d4',
-        insertionMarkerOpacity: 0.6,
-        cursorColour: '#7c3aed',
-        markerColour: '#06b6d4',
-        selectedGlowColour: '#7c3aed',
-        selectedGlowSize: 1
-      },
-      fontStyle: { family: 'Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif', weight: '600', size: 12 }
-    });
+        function generateArduinoCode() {
+            let setupCode = '';
+            let loopCode = '';
+            let includeCode = '';
+            let variableCode = '';
+            
+            // Pin tanımlamaları
+            let pinDefinitions = '';
+            
+            droppedBlocks.forEach(block => {
+                switch(block.type) {
+                    case 'TTP223 Kapasitif Dokunmatik':
+                        pinDefinitions += '#define TOUCH_PIN 2\n';
+                        setupCode += '  pinMode(TOUCH_PIN, INPUT);\n';
+                        loopCode += '  if (digitalRead(TOUCH_PIN) == HIGH) {\n    Serial.println("Dokunma algılandı!");\n  }\n';
+                        break;
+                        
+                    case 'Piezo Titreşim Sensörü':
+                        pinDefinitions += '#define PIEZO_PIN A0\n';
+                        setupCode += '  pinMode(PIEZO_PIN, INPUT);\n';
+                        loopCode += '  int piezoValue = analogRead(PIEZO_PIN);\n  if (piezoValue > 100) {\n    Serial.println("Titreşim algılandı: " + String(piezoValue));\n  }\n';
+                        break;
+                        
+                    case 'SW-420 Titreşim Sensörü':
+                        pinDefinitions += '#define VIBRATION_PIN 3\n';
+                        setupCode += '  pinMode(VIBRATION_PIN, INPUT);\n';
+                        loopCode += '  if (digitalRead(VIBRATION_PIN) == HIGH) {\n    Serial.println("SW-420 Titreşim algılandı!");\n  }\n';
+                        break;
+                        
+                    case 'Tilt Sensörü (Eğilme)':
+                        pinDefinitions += '#define TILT_PIN 4\n';
+                        setupCode += '  pinMode(TILT_PIN, INPUT_PULLUP);\n';
+                        loopCode += '  if (digitalRead(TILT_PIN) == LOW) {\n    Serial.println("Eğilme algılandı!");\n  }\n';
+                        break;
+                        
+                    case 'IR Alıcı (IR Receiver)':
+                        includeCode += '#include <IRremote.h>\n';
+                        pinDefinitions += '#define IR_RECEIVE_PIN 11\n';
+                        setupCode += '  IrReceiver.begin(IR_RECEIVE_PIN, ENABLE_LED_FEEDBACK);\n';
+                        loopCode += '  if (IrReceiver.decode()) {\n    Serial.println("IR Kod: 0x" + String(IrReceiver.decodedIRData.decodedRawData, HEX));\n    IrReceiver.resume();\n  }\n';
+                        break;
+                        
+                    case 'Push Button':
+                        pinDefinitions += '#define BUTTON_PIN 5\n';
+                        setupCode += '  pinMode(BUTTON_PIN, INPUT_PULLUP);\n';
+                        loopCode += '  if (digitalRead(BUTTON_PIN) == LOW) {\n    Serial.println("Buton basıldı!");\n    delay(200); // Debounce\n  }\n';
+                        break;
+                        
+                    case 'Toggle Switch':
+                        pinDefinitions += '#define SWITCH_PIN 6\n';
+                        setupCode += '  pinMode(SWITCH_PIN, INPUT_PULLUP);\n';
+                        loopCode += '  if (digitalRead(SWITCH_PIN) == LOW) {\n    Serial.println("Switch ON");\n  } else {\n    Serial.println("Switch OFF");\n  }\n';
+                        break;
+                        
+                    case 'Rotary Encoder':
+                        pinDefinitions += '#define ENCODER_CLK 7\n#define ENCODER_DT 8\n#define ENCODER_SW 9\n';
+                        variableCode += 'int encoderPos = 0;\nint lastCLK = HIGH;\n';
+                        setupCode += '  pinMode(ENCODER_CLK, INPUT);\n  pinMode(ENCODER_DT, INPUT);\n  pinMode(ENCODER_SW, INPUT_PULLUP);\n';
+                        loopCode += '  int currentCLK = digitalRead(ENCODER_CLK);\n  if (currentCLK != lastCLK && currentCLK == LOW) {\n    if (digitalRead(ENCODER_DT) == LOW) {\n      encoderPos++;\n    } else {\n      encoderPos--;\n    }\n    Serial.println("Encoder Position: " + String(encoderPos));\n  }\n  lastCLK = currentCLK;\n  \n  if (digitalRead(ENCODER_SW) == LOW) {\n    Serial.println("Encoder butonu basıldı!");\n    delay(200);\n  }\n';
+                        break;
+                        
+                    case 'LED Yak':
+                        pinDefinitions += '#define LED_PIN 13\n';
+                        setupCode += '  pinMode(LED_PIN, OUTPUT);\n';
+                        loopCode += '  digitalWrite(LED_PIN, HIGH);\n';
+                        break;
+                        
+                    case 'Serial Print':
+                        setupCode += '  Serial.begin(115200);\n';
+                        loopCode += '  Serial.println("Merhaba ESP32!");\n';
+                        break;
+                        
+                    case 'Delay':
+                        loopCode += '  delay(1000);\n';
+                        break;
+                }
+            });
+            
+            let fullCode = includeCode + '\n' + 
+                          pinDefinitions + '\n' + 
+                          variableCode + '\n' +
+                          'void setup() {\n' + 
+                          setupCode + 
+                          '}\n\n' +
+                          'void loop() {\n' + 
+                          loopCode + 
+                          '}\n';
+                          
+            return fullCode;
+        }
 
-    const workspace = Blockly.inject('blocklyDiv', {
-      toolbox: document.getElementById('toolbox'),
-      renderer: 'zelos',
-      theme: coolDark,
-      trashcan: true,
-      scrollbars: true,
-      grid: { spacing: 24, length: 3, colour: '#334155', snap: true },
-      zoom: { controls: true, wheel: true, startScale: 0.95, maxScale: 2.0, minScale: 0.4, scaleSpeed: 1.15 }
-    });
+        function closeCodeOutput() {
+            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('codeOutput').style.display = 'none';
+        }
 
-    /* ===== Robot / Konsol ===== */
-    const robotAsciiArt = {
-      default: `    /\\_/\\
-   ( o.o )
-    > ^ <
-   /     \\
-  (  ___  )
-   |  |  |
-   |__|__|`
-    };
-    function setStatus(text, color='var(--ok)'){
-      document.getElementById('robotStatus').textContent = text;
-      const dot = document.getElementById('statusDot');
-      dot.style.background = color; dot.style.boxShadow = `0 0 10px ${color}`;
-    }
-    function setAscii(){ document.getElementById('robotDisplay').textContent = robotAsciiArt.default; }
-    function addToOutput(message, color){
-      const output = document.getElementById('output');
-      const ts = new Date().toLocaleTimeString();
-      const style = color ? ` style="color:${color}"` : '';
-      output.innerHTML += `<br><span style="color:#64748b">[${ts}]</span><span${style}> ${message}</span>`;
-      output.scrollTop = output.scrollHeight;
-    }
-    function resetRobot(){
-      setStatus('Robot hazır','var(--ok)'); setAscii();
-      const output = document.getElementById('output');
-      output.innerHTML = '<strong>Konsol:</strong><br>[reset] Robot sıfırlandı.';
-    }
-    async function runCode(){
-      setStatus('Çalıştırılıyor…','var(--warn)');
-      addToOutput('Workspace kodu derleniyor…', '#a78bfa');
-      const code = Blockly.JavaScript.workspaceToCode(workspace);
-      console.log('Üretilen Kod:', code);
-      /* İstersen burada gerçek endpointine POST et:
-      await fetch('http://192.168.4.1:5280/execute', {
-        method:'POST', headers:{ 'Content-Type':'application/json' },
-        body: JSON.stringify({ code, timestamp: new Date().toISOString(), user: 'studio' })
-      });
-      */
-      addToOutput('Kod oluşturuldu (demo).', 'var(--ok)');
-      setStatus('Hazır','var(--ok)');
-      const disp = document.getElementById('robotDisplay');
-      disp.classList.add('bouncing'); setTimeout(()=>disp.classList.remove('bouncing'), 1200);
-    }
-    
-    function connectRobot(){
-      setStatus('Bağlanıyor…','var(--warn)');
-      addToOutput('Robot bağlantısı kuruluyor…', '#06b6d4');
-      // Burada gerçek bağlantı kodunu ekleyebilirsin
-      setTimeout(() => {
-        addToOutput('Robot bağlantısı kuruldu.', 'var(--ok)');
-        setStatus('Bağlı','var(--ok)');
-      }, 1500);
-    }
+        function copyCode() {
+            const code = document.getElementById('generatedCode').textContent;
+            navigator.clipboard.writeText(code).then(function() {
+                alert('Kod panoya kopyalandı!');
+            });
+        }
 
-    window.addEventListener('load', ()=>{
-      setAscii(); addToOutput('Blockly yüklendi. Tema: coolDark.', '#94a3b8');
-      
-      // Add starter block to workspace
-      const startBlock = workspace.newBlock('start_block');
-      startBlock.initSvg();
-      startBlock.render();
-      startBlock.moveBy(50, 50);
-      
-      // Make it a starting block (no previous connection)
-      startBlock.setPreviousStatement(false);
-    });
+        function saveProject() {
+            const projectData = {
+                blocks: droppedBlocks.map(block => ({
+                    type: block.type,
+                    x: block.x,
+                    y: block.y
+                })),
+                timestamp: new Date().toISOString()
+            };
+            
+            const dataStr = JSON.stringify(projectData, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'esp32_project.json';
+            link.click();
+        }
 
-    /* ======== BLOK TANIMLARI & KOD ÜRETECİLERİ ======== */
-    // Yardımcı
-    function logLine(msg){ addToOutput(msg); }
-    
-    // ---- BAŞLA BLOĞU ----
-    Blockly.Blocks['start_block']={init(){this.appendDummyInput().appendField("Başla");this.setPreviousStatement(false);this.setNextStatement(true);this.setColour('#22c55e');}};
-    Blockly.JavaScript['start_block']=()=>`logLine('• program başladı');\n`;
-
-    // ---- PIN ----
-    const RB='#7c3aed';
-    Blockly.Blocks['wake_up']={init(){this.appendDummyInput().appendField("Uyan");this.setPreviousStatement(true);this.setNextStatement(true);this.setColour(RB);}};
-
-    Blockly.JavaScript['wake_up']=()=>`logLine('• uyan');\n`;
-
-    // ---- PIN OPERATIONS ----
-    // Digital Write Block
-    Blockly.Blocks['digital_write']={init(){this.appendDummyInput().appendField("digital write").appendField(new Blockly.FieldDropdown([["1","1"],["0","0"]]),"VALUE").appendField("to pin");this.appendValueInput("PIN").setCheck("Number");this.setPreviousStatement(true);this.setNextStatement(true);this.setColour(RB);}};
-    
-    // Digital Read Block
-    Blockly.Blocks['digital_read']={init(){this.appendDummyInput().appendField("digital read pin");this.appendValueInput("PIN").setCheck("Number");this.setOutput(true,"Number");this.setColour(RB);}};
-    
-    // Analog Read Block
-    Blockly.Blocks['analog_read']={init(){this.appendDummyInput().appendField("analog read pin");this.appendValueInput("PIN").setCheck("Number");this.setOutput(true,"Number");this.setColour(RB);}};
-    
-    // PWM Pin Block
-    Blockly.Blocks['pwm_pin']={init(){this.appendDummyInput().appendField("PWM Pin");this.appendValueInput("PIN").setCheck("Number");this.appendDummyInput().appendField("Frequency");this.appendValueInput("FREQ").setCheck("Number");this.appendDummyInput().appendField("Duty");this.appendValueInput("DUTY").setCheck("Number");this.setPreviousStatement(true);this.setNextStatement(true);this.setColour(RB);}};
-    
-    // Touch Read Block
-    Blockly.Blocks['touch_read']={init(){this.appendDummyInput().appendField("touch read pin");this.appendValueInput("PIN").setCheck("Number");this.setOutput(true,"Number");this.setColour(RB);}};
-
-    // Measure Distance Block (Ultrasonic Sensor)
-    Blockly.Blocks['measure_distance']={init(){this.appendDummyInput().appendField("measure distance trig pin");this.appendValueInput("TRIG_PIN").setCheck("Number");this.appendDummyInput().appendField("echo pin");this.appendValueInput("ECHO_PIN").setCheck("Number");this.setOutput(true,"Number");this.setColour(RB);}};
-
-    // Display Set SCL SDA Block
-    Blockly.Blocks['display_set_scl_sda']={init(){this.appendDummyInput().appendField("Display Set SCL Pin");this.appendValueInput("SCL_PIN").setCheck("Number");this.appendDummyInput().appendField("SDA Pin");this.appendValueInput("SDA_PIN").setCheck("Number");this.setPreviousStatement(true);this.setNextStatement(true);this.setColour(RB);}};
-
-    // JavaScript generators
-    Blockly.JavaScript['digital_write']=b=>{
-      const value = b.getFieldValue('VALUE');
-      const pin = Blockly.JavaScript.valueToCode(b,'PIN',0) || '0';
-      return `logLine('• digital write ${value} to pin ${pin}');\n`;
-    };
-    
-    Blockly.JavaScript['digital_read']=b=>{
-      const pin = Blockly.JavaScript.valueToCode(b,'PIN',0) || '0';
-      return [`digitalRead(${pin})`, 0];
-    };
-    
-    Blockly.JavaScript['analog_read']=b=>{
-      const pin = Blockly.JavaScript.valueToCode(b,'PIN',0) || '0';
-      return [`analogRead(${pin})`, 0];
-    };
-    
-    Blockly.JavaScript['pwm_pin']=b=>{
-      const pin = Blockly.JavaScript.valueToCode(b,'PIN',0) || '0';
-      const freq = Blockly.JavaScript.valueToCode(b,'FREQ',0) || '1000';
-      const duty = Blockly.JavaScript.valueToCode(b,'DUTY',0) || '50';
-      return `logLine('• PWM pin ${pin}, freq: ${freq}, duty: ${duty}');\n`;
-    };
-    
-    Blockly.JavaScript['touch_read']=b=>{
-      const pin = Blockly.JavaScript.valueToCode(b,'PIN',0) || '0';
-      return [`touchRead(${pin})`, 0];
-    };
-    
-    Blockly.JavaScript['measure_distance']=b=>{
-      const trigPin = Blockly.JavaScript.valueToCode(b,'TRIG_PIN',0) || '0';
-      const echoPin = Blockly.JavaScript.valueToCode(b,'ECHO_PIN',0) || '0';
-      return [`measureDistance(${trigPin}, ${echoPin})`, 0];
-    };
-    
-    Blockly.JavaScript['display_set_scl_sda']=b=>{
-      const sclPin = Blockly.JavaScript.valueToCode(b,'SCL_PIN',0) || '22';
-      const sdaPin = Blockly.JavaScript.valueToCode(b,'SDA_PIN',0) || '21';
-      return `logLine('• Display SCL: ${sclPin}, SDA: ${sdaPin}');\n`;
-    };
-
-    // ---- SES ----
-    // ---- DUYGU ----
-    const EB='#22c55e';
-    ['happy','sad','excited','sleepy','angry'].forEach((k)=>{
-      Blockly.Blocks[k]={init(){this.appendDummyInput().appendField(k.toUpperCase());this.setPreviousStatement(true);this.setNextStatement(true);this.setColour(EB);}};
-      Blockly.JavaScript[k]=()=>`logLine('• duygu: ${k}');\n`;
-    });
-
-    // ---- ZAMAN ----
-    const TB='#60a5fa';
-    
-    // If Then Block
-    Blockly.Blocks['if_then']={init(){
-      this.appendValueInput("CONDITION").setCheck("Boolean").appendField("if");
-      this.appendStatementInput("DO").appendField("then");
-      this.setPreviousStatement(true);
-      this.setNextStatement(true);
-      this.setColour('#f59e0b');
-    }};
-    
-    // If Then Else Block
-    Blockly.Blocks['if_then_else']={init(){
-      this.appendValueInput("CONDITION").setCheck("Boolean").appendField("if");
-      this.appendStatementInput("DO").appendField("then");
-      this.appendStatementInput("ELSE").appendField("else");
-      this.setPreviousStatement(true);
-      this.setNextStatement(true);
-      this.setColour('#f59e0b');
-    }};
-    
-    // While Repeat Block
-    Blockly.Blocks['while_repeat']={init(){
-      this.appendValueInput("CONDITION").setCheck("Boolean").appendField("while");
-      this.appendStatementInput("DO").appendField("repeat");
-      this.setPreviousStatement(true);
-      this.setNextStatement(true);
-      this.setColour('#f59e0b');
-    }};
-    
-    // Repeat Until Block
-    Blockly.Blocks['repeat_until']={init(){
-      this.appendValueInput("CONDITION").setCheck("Boolean").appendField("repeat until");
-      this.appendStatementInput("DO");
-      this.setPreviousStatement(true);
-      this.setNextStatement(true);
-      this.setColour('#f59e0b');
-    }};
-    
-    // Forever Block
-    Blockly.Blocks['forever']={init(){
-      this.appendDummyInput().appendField("forever");
-      this.appendStatementInput("DO");
-      this.setPreviousStatement(true);
-      this.setNextStatement(true);
-      this.setColour('#f59e0b');
-    }};
-    
-    Blockly.Blocks['wait']={init(){this.appendDummyInput().appendField("Bekle").appendField(new Blockly.FieldNumber(1,0,10,1),"SECONDS").appendField("sn");this.setPreviousStatement(true);this.setNextStatement(true);this.setColour(TB);}};
-    Blockly.Blocks['repeat_action']={init(){this.appendDummyInput().appendField("Tekrarla").appendField(new Blockly.FieldNumber(3,1,20,1),"TIMES").appendField("kez");this.appendStatementInput("DO");this.setPreviousStatement(true);this.setNextStatement(true);this.setColour(TB);}};
-
-    Blockly.JavaScript['wait']=b=>`logLine('• bekle ${b.getFieldValue('SECONDS')}sn');\n`;
-    
-    // JavaScript generators for new blocks
-    Blockly.JavaScript['if_then']=b=>{
-      const condition = Blockly.JavaScript.valueToCode(b,'CONDITION',0) || 'false';
-      const doCode = Blockly.JavaScript.statementToCode(b,'DO');
-      return `if(${condition}){\n${doCode}}\n`;
-    };
-    
-    Blockly.JavaScript['if_then_else']=b=>{
-      const condition = Blockly.JavaScript.valueToCode(b,'CONDITION',0) || 'false';
-      const doCode = Blockly.JavaScript.statementToCode(b,'DO');
-      const elseCode = Blockly.JavaScript.statementToCode(b,'ELSE');
-      return `if(${condition}){\n${doCode}}else{\n${elseCode}}\n`;
-    };
-    
-    Blockly.JavaScript['while_repeat']=b=>{
-      const condition = Blockly.JavaScript.valueToCode(b,'CONDITION',0) || 'false';
-      const doCode = Blockly.JavaScript.statementToCode(b,'DO');
-      return `while(${condition}){\n${doCode}}\n`;
-    };
-    
-    Blockly.JavaScript['repeat_until']=b=>{
-      const condition = Blockly.JavaScript.valueToCode(b,'CONDITION',0) || 'false';
-      const doCode = Blockly.JavaScript.statementToCode(b,'DO');
-      return `while(!(${condition})){\n${doCode}}\n`;
-    };
-    
-    Blockly.JavaScript['forever']=b=>{
-      const doCode = Blockly.JavaScript.statementToCode(b,'DO');
-      return `while(true){\n${doCode}}\n`;
-    };
-    
-    Blockly.JavaScript['repeat_action']=b=>{
-      const n=b.getFieldValue('TIMES');
-      const body=Blockly.JavaScript.statementToCode(b,'DO');
-      return `for(let i=0;i<${n};i++){${body}}\n`;
-    };
-
-    // ---- YENİ ZAMAN BLOKLARI ----
-    // Count With Block
-    Blockly.Blocks['count_with']={init(){
-      this.appendDummyInput().appendField("count with").appendField(new Blockly.FieldVariable("i"),"VAR").appendField("from");
-      this.appendValueInput("FROM").setCheck("Number");
-      this.appendDummyInput().appendField("to");
-      this.appendValueInput("TO").setCheck("Number");
-      this.appendDummyInput().appendField("by step");
-      this.appendValueInput("STEP").setCheck("Number");
-      this.appendDummyInput().appendField("repeat");
-      this.appendStatementInput("DO");
-      this.setPreviousStatement(true);
-      this.setNextStatement(true);
-      this.setColour('#f59e0b');
-    }};
-
-    // Repeat Times Block (simple)
-    Blockly.Blocks['repeat_times']={init(){
-      this.appendDummyInput().appendField("repeat");
-      this.appendValueInput("TIMES").setCheck("Number");
-      this.appendStatementInput("DO");
-      this.setPreviousStatement(true);
-      this.setNextStatement(true);
-      this.setColour('#f59e0b');
-    }};
-
-    // Break Block
-    Blockly.Blocks['break_loop']={init(){
-      this.appendDummyInput().appendField("break");
-      this.setPreviousStatement(true);
-      this.setColour('#f59e0b');
-    }};
-
-    // Continue Block
-    Blockly.Blocks['continue_loop']={init(){
-      this.appendDummyInput().appendField("continue");
-      this.setPreviousStatement(true);
-      this.setColour('#f59e0b');
-    }};
-
-    // Wait Until Block
-    Blockly.Blocks['wait_until']={init(){
-      this.appendDummyInput().appendField("wait until");
-      this.appendValueInput("CONDITION").setCheck("Boolean");
-      this.setPreviousStatement(true);
-      this.setNextStatement(true);
-      this.setColour('#f59e0b');
-    }};
-
-    // JavaScript generators for new blocks
-    Blockly.JavaScript['count_with']=b=>{
-      const variable = Blockly.JavaScript.nameDB_.getName(b.getFieldValue('VAR'), Blockly.Variables.NAME_TYPE);
-      const from = Blockly.JavaScript.valueToCode(b,'FROM',0) || '0';
-      const to = Blockly.JavaScript.valueToCode(b,'TO',0) || '10';
-      const step = Blockly.JavaScript.valueToCode(b,'STEP',0) || '1';
-      const body = Blockly.JavaScript.statementToCode(b,'DO');
-      return `for(let ${variable}=${from}; ${variable}<=${to}; ${variable}+=${step}){\n${body}}\n`;
-    };
-
-    Blockly.JavaScript['repeat_times']=b=>{
-      const times = Blockly.JavaScript.valueToCode(b,'TIMES',0) || '1';
-      const body = Blockly.JavaScript.statementToCode(b,'DO');
-      return `for(let i=0; i<${times}; i++){\n${body}}\n`;
-    };
-
-    Blockly.JavaScript['break_loop']=()=>`break;\n`;
-    Blockly.JavaScript['continue_loop']=()=>`continue;\n`;
-    
-    Blockly.JavaScript['wait_until']=b=>{
-      const condition = Blockly.JavaScript.valueToCode(b,'CONDITION',0) || 'false';
-      return `while(!(${condition})){\n  logLine('• waiting...');\n}\n`;
-    };
-
-    // ---- KOŞUL ---- (demo: mutlu/yor gun sabit; istersen state bağlarız)
-    const QB='#a78bfa';
-    Blockly.Blocks['if_happy']={init(){this.appendDummyInput().appendField("Eğer");this.appendValueInput("CONDITION").setCheck("Boolean");this.appendStatementInput("DO");this.setPreviousStatement(true);this.setNextStatement(true);this.setColour(QB);}};
-    Blockly.Blocks['if_tired']={init(){this.appendDummyInput().appendField("Eğer Yorgunsan");this.appendStatementInput("DO");this.setPreviousStatement(true);this.setNextStatement(true);this.setColour(QB);}};
-
-    Blockly.JavaScript['if_happy']=b=>{
-      const condition = Blockly.JavaScript.valueToCode(b,'CONDITION',0) || 'false';
-      return `if(${condition}){\n${Blockly.JavaScript.statementToCode(b,'DO')}}\n`;
-    };
-    Blockly.JavaScript['if_tired']=b=>`if(false){\n${Blockly.JavaScript.statementToCode(b,'DO')}}\n`;
-
-    // ---- MATEMATİK & KARŞILAŞTIR ----
-    const MB='#f43f5e', CB='#0ea5e9';
-    Blockly.Blocks['math_add']={init(){this.appendValueInput("A").setCheck("Number").appendField("+");this.appendValueInput("B").setCheck("Number");this.setOutput(true,"Number");this.setColour(MB);}};
-    Blockly.Blocks['math_subtract']={init(){this.appendValueInput("A").setCheck("Number").appendField("-");this.appendValueInput("B").setCheck("Number");this.setOutput(true,"Number");this.setColour(MB);}};
-    Blockly.Blocks['math_multiply']={init(){this.appendValueInput("A").setCheck("Number").appendField("×");this.appendValueInput("B").setCheck("Number");this.setOutput(true,"Number");this.setColour(MB);}};
-    Blockly.Blocks['math_number']={init(){this.appendDummyInput().appendField(new Blockly.FieldNumber(0),"NUM");this.setOutput(true,"Number");this.setColour(MB);}};
-    Blockly.Blocks['show_result']={init(){this.appendValueInput("VALUE").setCheck("Number").appendField("Sonucu Göster");this.setPreviousStatement(true);this.setNextStatement(true);this.setColour(MB);}};
-
-    Blockly.JavaScript['math_add']=b=>[`(${Blockly.JavaScript.valueToCode(b,'A',0)||'0'}+${Blockly.JavaScript.valueToCode(b,'B',0)||'0'})`,0];
-    Blockly.JavaScript['math_subtract']=b=>[`(${Blockly.JavaScript.valueToCode(b,'A',0)||'0'}-${Blockly.JavaScript.valueToCode(b,'B',0)||'0'})`,0];
-    Blockly.JavaScript['math_multiply']=b=>[`(${Blockly.JavaScript.valueToCode(b,'A',0)||'0'}*${Blockly.JavaScript.valueToCode(b,'B',0)||'0'})`,0];
-    Blockly.JavaScript['math_number']=b=>[String(parseFloat(b.getFieldValue('NUM'))),0];
-    Blockly.JavaScript['show_result']=b=>`logLine('• sonuç: '+(${Blockly.JavaScript.valueToCode(b,'VALUE',0)||'0'}));\n`;
-
-    Blockly.Blocks['math_compare']={init(){this.appendValueInput("A").setCheck("Number");this.appendDummyInput().appendField(new Blockly.FieldDropdown([["=","EQ"],["≠","NEQ"],["<","LT"],["≤","LTE"],[">","GT"],["≥","GTE"]]),"OP");this.appendValueInput("B").setCheck("Number");this.setOutput(true,"Boolean");this.setColour(CB);}};
-    Blockly.Blocks['logic_and']={init(){this.appendValueInput("A").setCheck("Boolean").appendField("VE");this.appendValueInput("B").setCheck("Boolean");this.setOutput(true,"Boolean");this.setColour(CB);}};
-    Blockly.Blocks['logic_or']={init(){this.appendValueInput("A").setCheck("Boolean").appendField("VEYA");this.appendValueInput("B").setCheck("Boolean");this.setOutput(true,"Boolean");this.setColour(CB);}};
-    Blockly.Blocks['logic_not']={init(){this.appendValueInput("BOOL").setCheck("Boolean").appendField("DEĞİL");this.setOutput(true,"Boolean");this.setColour(CB);}};
-    Blockly.Blocks['logic_boolean']={init(){this.appendDummyInput().appendField(new Blockly.FieldDropdown([["doğru","TRUE"],["yanlış","FALSE"]]),"BOOL");this.setOutput(true,"Boolean");this.setColour(CB);}};
-    Blockly.JavaScript['math_compare']=b=>{
-      const A=Blockly.JavaScript.valueToCode(b,'A',0)||'0';
-      const B=Blockly.JavaScript.valueToCode(b,'B',0)||'0';
-      const opMap={EQ:'==',NEQ:'!=',LT:'<',LTE:'<=',GT:'>',GTE:'>='};
-      return [`(${A} ${opMap[b.getFieldValue('OP')]} ${B})`,0];
-    };
-    Blockly.JavaScript['logic_and']=b=>[`((${Blockly.JavaScript.valueToCode(b,'A',0)||'false'})&&(${Blockly.JavaScript.valueToCode(b,'B',0)||'false'}))`,0];
-    Blockly.JavaScript['logic_or']=b=>[`((${Blockly.JavaScript.valueToCode(b,'A',0)||'false'})||(${Blockly.JavaScript.valueToCode(b,'B',0)||'false'}))`,0];
-    Blockly.JavaScript['logic_not']=b=>[`(!(${Blockly.JavaScript.valueToCode(b,'BOOL',0)||'false'}))`,0];
-    Blockly.JavaScript['logic_boolean']=b=>[(b.getFieldValue('BOOL')==='TRUE')?'true':'false',0];
-
-    // ---- SENSÖR ----
-    const SensorB='#10b981';
-    
-    // Temperature Sensor Block
-    Blockly.Blocks['read_temperature']={init(){
-      this.appendDummyInput().appendField("Sıcaklık Oku Pin");
-      this.appendValueInput("PIN").setCheck("Number");
-      this.setOutput(true,"Number");
-      this.setColour(SensorB);
-    }};
-    
-    // Humidity Sensor Block
-    Blockly.Blocks['read_humidity']={init(){
-      this.appendDummyInput().appendField("Nem Oku Pin");
-      this.appendValueInput("PIN").setCheck("Number");
-      this.setOutput(true,"Number");
-      this.setColour(SensorB);
-    }};
-    
-    // Light Sensor Block
-    Blockly.Blocks['read_light_sensor']={init(){
-      this.appendDummyInput().appendField("Işık Sensörü Oku Pin");
-      this.appendValueInput("PIN").setCheck("Number");
-      this.setOutput(true,"Number");
-      this.setColour(SensorB);
-    }};
-    
-    // Motion Sensor Block
-    Blockly.Blocks['read_motion_sensor']={init(){
-      this.appendDummyInput().appendField("Hareket Sensörü Oku Pin");
-      this.appendValueInput("PIN").setCheck("Number");
-      this.setOutput(true,"Boolean");
-      this.setColour(SensorB);
-    }};
-    
-    // Gas Sensor Block
-    Blockly.Blocks['read_gas_sensor']={init(){
-      this.appendDummyInput().appendField("Gaz Sensörü Oku Pin");
-      this.appendValueInput("PIN").setCheck("Number");
-      this.setOutput(true,"Number");
-      this.setColour(SensorB);
-    }};
-    
-    // Pressure Sensor Block
-    Blockly.Blocks['read_pressure']={init(){
-      this.appendDummyInput().appendField("Basınç Sensörü Oku Pin");
-      this.appendValueInput("PIN").setCheck("Number");
-      this.setOutput(true,"Number");
-      this.setColour(SensorB);
-    }};
-    
-    // Accelerometer Block
-    Blockly.Blocks['read_accelerometer']={init(){
-      this.appendDummyInput().appendField("İvmeölçer Oku").appendField(new Blockly.FieldDropdown([["X","X"],["Y","Y"],["Z","Z"]]),"AXIS");
-      this.setOutput(true,"Number");
-      this.setColour(SensorB);
-    }};
-    
-    // Gyroscope Block
-    Blockly.Blocks['read_gyroscope']={init(){
-      this.appendDummyInput().appendField("Jiroskop Oku").appendField(new Blockly.FieldDropdown([["X","X"],["Y","Y"],["Z","Z"]]),"AXIS");
-      this.setOutput(true,"Number");
-      this.setColour(SensorB);
-    }};
-    
-    // JavaScript generators for sensor blocks
-    Blockly.JavaScript['read_temperature']=b=>{
-      const pin = Blockly.JavaScript.valueToCode(b,'PIN',0) || '0';
-      return [`readTemperature(${pin})`, 0];
-    };
-    
-    Blockly.JavaScript['read_humidity']=b=>{
-      const pin = Blockly.JavaScript.valueToCode(b,'PIN',0) || '0';
-      return [`readHumidity(${pin})`, 0];
-    };
-    
-    Blockly.JavaScript['read_light_sensor']=b=>{
-      const pin = Blockly.JavaScript.valueToCode(b,'PIN',0) || '0';
-      return [`readLightSensor(${pin})`, 0];
-    };
-    
-    Blockly.JavaScript['read_motion_sensor']=b=>{
-      const pin = Blockly.JavaScript.valueToCode(b,'PIN',0) || '0';
-      return [`readMotionSensor(${pin})`, 0];
-    };
-    
-    Blockly.JavaScript['read_gas_sensor']=b=>{
-      const pin = Blockly.JavaScript.valueToCode(b,'PIN',0) || '0';
-      return [`readGasSensor(${pin})`, 0];
-    };
-    
-    Blockly.JavaScript['read_pressure']=b=>{
-      const pin = Blockly.JavaScript.valueToCode(b,'PIN',0) || '0';
-      return [`readPressure(${pin})`, 0];
-    };
-    
-    Blockly.JavaScript['read_accelerometer']=b=>{
-      const axis = b.getFieldValue('AXIS');
-      return [`readAccelerometer('${axis}')`, 0];
-    };
-    
-    Blockly.JavaScript['read_gyroscope']=b=>{
-      const axis = b.getFieldValue('AXIS');
-      return [`readGyroscope('${axis}')`, 0];
-    };
-
-    // ---- IŞIK VE GÖRÜNTÜ SENSÖRLERİ ----
-    const LightImageB='#f59e0b';
-    
-    // LDR (Light Dependent Resistor) Block
-    Blockly.Blocks['ldr_read']={init(){
-      this.appendDummyInput().appendField("LDR Işık Oku Pin");
-      this.appendValueInput("PIN").setCheck("Number");
-      this.setOutput(true,"Number");
-      this.setColour(LightImageB);
-      this.setTooltip("Ortam ışığı ölçümü");
-    }};
-    
-    // TCS34725 Color Sensor Block
-    Blockly.Blocks['tcs34725_color']={init(){
-      this.appendDummyInput().appendField("TCS34725 Renk Oku").appendField(new Blockly.FieldDropdown([["Kırmızı","R"],["Yeşil","G"],["Mavi","B"],["Berraklık","C"]]),"COLOR");
-      this.setOutput(true,"Number");
-      this.setColour(LightImageB);
-      this.setTooltip("Renk algılama sensörü");
-    }};
-    
-    // APDS9960 Proximity Sensor Block
-    Blockly.Blocks['apds9960_proximity']={init(){
-      this.appendDummyInput().appendField("APDS9960 Yakınlık Oku");
-      this.setOutput(true,"Number");
-      this.setColour(LightImageB);
-      this.setTooltip("Yakınlık algılama sensörü");
-    }};
-    
-    // IR Line Sensor Block
-    Blockly.Blocks['ir_line_sensor']={init(){
-      this.appendDummyInput().appendField("IR Çizgi Sensörü Pin");
-      this.appendValueInput("PIN").setCheck("Number");
-      this.setOutput(true,"Boolean");
-      this.setColour(LightImageB);
-      this.setTooltip("Çizgi izleme robotları için");
-    }};
-    
-    // Flame Sensor Block
-    Blockly.Blocks['flame_sensor']={init(){
-      this.appendDummyInput().appendField("Alev Sensörü Pin");
-      this.appendValueInput("PIN").setCheck("Number");
-      this.setOutput(true,"Boolean");
-      this.setColour(LightImageB);
-      this.setTooltip("Alev tespiti (yangın eğitimi)");
-    }};
-    
-    // Camera Capture Block
-    Blockly.Blocks['camera_capture']={init(){
-      this.appendDummyInput().appendField("Kamera Görüntü Al");
-      this.setPreviousStatement(true);
-      this.setNextStatement(true);
-      this.setColour(LightImageB);
-      this.setTooltip("Görüntü işleme (ileri seviye)");
-    }};
-    
-    // JavaScript generators for light and image sensor blocks
-    Blockly.JavaScript['ldr_read']=b=>{
-      const pin = Blockly.JavaScript.valueToCode(b,'PIN',0) || '0';
-      return [`readLDR(${pin})`, 0];
-    };
-    
-    Blockly.JavaScript['tcs34725_color']=b=>{
-      const color = b.getFieldValue('COLOR');
-      return [`readTCS34725('${color}')`, 0];
-    };
-    
-    Blockly.JavaScript['apds9960_proximity']=b=>{
-      return [`readAPDS9960Proximity()`, 0];
-    };
-    
-    Blockly.JavaScript['ir_line_sensor']=b=>{
-      const pin = Blockly.JavaScript.valueToCode(b,'PIN',0) || '0';
-      return [`readIRLineSensor(${pin})`, 0];
-    };
-    
-    Blockly.JavaScript['flame_sensor']=b=>{
-      const pin = Blockly.JavaScript.valueToCode(b,'PIN',0) || '0';
-      return [`readFlameSensor(${pin})`, 0];
-    };
-    
-    Blockly.JavaScript['camera_capture']=b=>{
-      return `logLine('• kamera görüntü alındı');\ncaptureImage();\n`;
-    };
-
-    // ---- 🌡️ ISI, NEM, GAZ VE BASINÇ SENSÖRLERİ ----
-    const TempHumidityB='#ef4444';
-    
-    // DHT11 Sensor Block
-    Blockly.Blocks['dht11_read']={init(){
-      this.appendDummyInput().appendField("DHT11 Oku").appendField(new Blockly.FieldDropdown([["Sıcaklık","TEMP"],["Nem","HUM"]]),"TYPE");
-      this.appendDummyInput().appendField("Pin");
-      this.appendValueInput("PIN").setCheck("Number");
-      this.setOutput(true,"Number");
-      this.setColour(TempHumidityB);
-      this.setTooltip("DHT11 sıcaklık ve nem sensörü");
-    }};
-    
-    // DHT22 Sensor Block
-    Blockly.Blocks['dht22_read']={init(){
-      this.appendDummyInput().appendField("DHT22 Oku").appendField(new Blockly.FieldDropdown([["Sıcaklık","TEMP"],["Nem","HUM"]]),"TYPE");
-      this.appendDummyInput().appendField("Pin");
-      this.appendValueInput("PIN").setCheck("Number");
-      this.setOutput(true,"Number");
-      this.setColour(TempHumidityB);
-      this.setTooltip("DHT22 yüksek hassasiyetli sıcaklık ve nem sensörü");
-    }};
-    
-    // BMP180 Sensor Block
-    Blockly.Blocks['bmp180_read']={init(){
-      this.appendDummyInput().appendField("BMP180 Oku").appendField(new Blockly.FieldDropdown([["Basınç","PRESS"],["Sıcaklık","TEMP"],["Rakım","ALT"]]),"TYPE");
-      this.setOutput(true,"Number");
-      this.setColour(TempHumidityB);
-      this.setTooltip("BMP180 basınç ve sıcaklık sensörü");
-    }};
-    
-    // BMP280 Sensor Block
-    Blockly.Blocks['bmp280_read']={init(){
-      this.appendDummyInput().appendField("BMP280 Oku").appendField(new Blockly.FieldDropdown([["Basınç","PRESS"],["Sıcaklık","TEMP"],["Rakım","ALT"]]),"TYPE");
-      this.setOutput(true,"Number");
-      this.setColour(TempHumidityB);
-      this.setTooltip("BMP280 yüksek hassasiyetli basınç ve sıcaklık sensörü");
-    }};
-    
-    // BME280 Sensor Block
-    Blockly.Blocks['bme280_read']={init(){
-      this.appendDummyInput().appendField("BME280 Oku").appendField(new Blockly.FieldDropdown([["Basınç","PRESS"],["Sıcaklık","TEMP"],["Nem","HUM"],["Rakım","ALT"]]),"TYPE");
-      this.setOutput(true,"Number");
-      this.setColour(TempHumidityB);
-      this.setTooltip("BME280 basınç, sıcaklık ve nem sensörü");
-    }};
-    
-    // LM35 Sensor Block
-    Blockly.Blocks['lm35_read']={init(){
-      this.appendDummyInput().appendField("LM35 Sıcaklık Oku Pin");
-      this.appendValueInput("PIN").setCheck("Number");
-      this.setOutput(true,"Number");
-      this.setColour(TempHumidityB);
-      this.setTooltip("LM35 analog sıcaklık sensörü");
-    }};
-    
-    // TMP36 Sensor Block
-    Blockly.Blocks['tmp36_read']={init(){
-      this.appendDummyInput().appendField("TMP36 Sıcaklık Oku Pin");
-      this.appendValueInput("PIN").setCheck("Number");
-      this.setOutput(true,"Number");
-      this.setColour(TempHumidityB);
-      this.setTooltip("TMP36 analog sıcaklık sensörü");
-    }};
-    
-    // MAX31855 Thermocouple Block
-    Blockly.Blocks['max31855_read']={init(){
-      this.appendDummyInput().appendField("MAX31855 Termokupl Oku");
-      this.appendDummyInput().appendField("CS Pin");
-      this.appendValueInput("CS_PIN").setCheck("Number");
-      this.setOutput(true,"Number");
-      this.setColour(TempHumidityB);
-      this.setTooltip("MAX31855 yüksek sıcaklık termokupl sensörü");
-    }};
-    
-    // MQ2 Gas Sensor Block
-    Blockly.Blocks['mq2_read']={init(){
-      this.appendDummyInput().appendField("MQ2 Duman Sensörü Pin");
-      this.appendValueInput("PIN").setCheck("Number");
-      this.setOutput(true,"Number");
-      this.setColour(TempHumidityB);
-      this.setTooltip("MQ2 duman ve yanıcı gaz sensörü");
-    }};
-    
-    // MQ3 Gas Sensor Block
-    Blockly.Blocks['mq3_read']={init(){
-      this.appendDummyInput().appendField("MQ3 Alkol Sensörü Pin");
-      this.appendValueInput("PIN").setCheck("Number");
-      this.setOutput(true,"Number");
-      this.setColour(TempHumidityB);
-      this.setTooltip("MQ3 alkol gaz sensörü");
-    }};
-    
-    // MQ7 Gas Sensor Block
-    Blockly.Blocks['mq7_read']={init(){
-      this.appendDummyInput().appendField("MQ7 CO Sensörü Pin");
-      this.appendValueInput("PIN").setCheck("Number");
-      this.setOutput(true,"Number");
-      this.setColour(TempHumidityB);
-      this.setTooltip("MQ7 karbon monoksit sensörü");
-    }};
-    
-    // MQ135 Gas Sensor Block
-    Blockly.Blocks['mq135_read']={init(){
-      this.appendDummyInput().appendField("MQ135 Hava Kalitesi Pin");
-      this.appendValueInput("PIN").setCheck("Number");
-      this.setOutput(true,"Number");
-      this.setColour(TempHumidityB);
-      this.setTooltip("MQ135 hava kalitesi ve CO2 sensörü");
-    }};
-    
-    // JavaScript generators for temperature, humidity, gas and pressure sensors
-    Blockly.JavaScript['dht11_read']=b=>{
-      const type = b.getFieldValue('TYPE');
-      const pin = Blockly.JavaScript.valueToCode(b,'PIN',0) || '0';
-      return [`readDHT11('${type}', ${pin})`, 0];
-    };
-    
-    Blockly.JavaScript['dht22_read']=b=>{
-      const type = b.getFieldValue('TYPE');
-      const pin = Blockly.JavaScript.valueToCode(b,'PIN',0) || '0';
-      return [`readDHT22('${type}', ${pin})`, 0];
-    };
-    
-    Blockly.JavaScript['bmp180_read']=b=>{
-      const type = b.getFieldValue('TYPE');
-      return [`readBMP180('${type}')`, 0];
-    };
-    
-    Blockly.JavaScript['bmp280_read']=b=>{
-      const type = b.getFieldValue('TYPE');
-      return [`readBMP280('${type}')`, 0];
-    };
-    
-    Blockly.JavaScript['bme280_read']=b=>{
-      const type = b.getFieldValue('TYPE');
-      return [`readBME280('${type}')`, 0];
-    };
-    
-    Blockly.JavaScript['lm35_read']=b=>{
-      const pin = Blockly.JavaScript.valueToCode(b,'PIN',0) || '0';
-      return [`readLM35(${pin})`, 0];
-    };
-    
-    Blockly.JavaScript['tmp36_read']=b=>{
-      const pin = Blockly.JavaScript.valueToCode(b,'PIN',0) || '0';
-      return [`readTMP36(${pin})`, 0];
-    };
-    
-    Blockly.JavaScript['max31855_read']=b=>{
-      const csPin = Blockly.JavaScript.valueToCode(b,'CS_PIN',0) || '5';
-      return [`readMAX31855(${csPin})`, 0];
-    };
-    
-    Blockly.JavaScript['mq2_read']=b=>{
-      const pin = Blockly.JavaScript.valueToCode(b,'PIN',0) || '0';
-      return [`readMQ2(${pin})`, 0];
-    };
-    
-    Blockly.JavaScript['mq3_read']=b=>{
-      const pin = Blockly.JavaScript.valueToCode(b,'PIN',0) || '0';
-      return [`readMQ3(${pin})`, 0];
-    };
-    
-    Blockly.JavaScript['mq7_read']=b=>{
-      const pin = Blockly.JavaScript.valueToCode(b,'PIN',0) || '0';
-      return [`readMQ7(${pin})`, 0];
-    };
-    
-    Blockly.JavaScript['mq135_read']=b=>{
-      const pin = Blockly.JavaScript.valueToCode(b,'PIN',0) || '0';
-      return [`readMQ135(${pin})`, 0];
-    };
-
-    // ---- 📍 MESAFE VE YAKINLIK SENSÖRLERİ ----
-    const DistanceProximityB='#06b6d4';
-    
-    // HC-SR04 Ultrasonic Distance Sensor Block
-    Blockly.Blocks['hc_sr04_distance']={init(){
-      this.appendDummyInput().appendField("HC-SR04 Mesafe Ölç");
-      this.appendDummyInput().appendField("Trig Pin");
-      this.appendValueInput("TRIG_PIN").setCheck("Number");
-      this.appendDummyInput().appendField("Echo Pin");
-      this.appendValueInput("ECHO_PIN").setCheck("Number");
-      this.setOutput(true,"Number");
-      this.setColour(DistanceProximityB);
-      this.setTooltip("Ultrasonik mesafe ölçümü");
-    }};
-    
-    // Sharp GP2Y0A21 IR Distance Sensor Block
-    Blockly.Blocks['sharp_gp2y0a21_distance']={init(){
-      this.appendDummyInput().appendField("Sharp GP2Y0A21 Mesafe Pin");
-      this.appendValueInput("PIN").setCheck("Number");
-      this.setOutput(true,"Number");
-      this.setColour(DistanceProximityB);
-      this.setTooltip("Kızılötesi mesafe sensörü");
-    }};
-    
-    // HLK-LD2410S Human Detection Block
-    Blockly.Blocks['hlk_ld2410s_human_detect']={init(){
-      this.appendDummyInput().appendField("HLK-LD2410S İnsan Algıla");
-      this.appendDummyInput().appendField("RX Pin");
-      this.appendValueInput("RX_PIN").setCheck("Number");
-      this.appendDummyInput().appendField("TX Pin");
-      this.appendValueInput("TX_PIN").setCheck("Number");
-      this.setOutput(true,"Boolean");
-      this.setColour(DistanceProximityB);
-      this.setTooltip("Radar tabanlı insan algılama");
-    }};
-    
-    // HLK-LD2420 Human Detection Block
-    Blockly.Blocks['hlk_ld2420_human_detect']={init(){
-      this.appendDummyInput().appendField("HLK-LD2420 İnsan Algıla");
-      this.appendDummyInput().appendField("RX Pin");
-      this.appendValueInput("RX_PIN").setCheck("Number");
-      this.appendDummyInput().appendField("TX Pin");
-      this.appendValueInput("TX_PIN").setCheck("Number");
-      this.setOutput(true,"Boolean");
-      this.setColour(DistanceProximityB);
-      this.setTooltip("Radar tabanlı insan algılama (gelişmiş)");
-    }};
-    
-    // ToF VL53L0X Distance Sensor Block
-    Blockly.Blocks['tof_vl53l0x_distance']={init(){
-      this.appendDummyInput().appendField("VL53L0X ToF Mesafe Ölç");
-      this.setOutput(true,"Number");
-      this.setColour(DistanceProximityB);
-      this.setTooltip("Lazer mesafe sensörü (çok hassas)");
-    }};
-    
-    // ToF VL53L1X Distance Sensor Block
-    Blockly.Blocks['tof_vl53l1x_distance']={init(){
-      this.appendDummyInput().appendField("VL53L1X ToF Mesafe Ölç");
-      this.setOutput(true,"Number");
-      this.setColour(DistanceProximityB);
-      this.setTooltip("Lazer mesafe sensörü (uzun menzil)");
-    }};
-    
-    // JavaScript generators for distance and proximity sensors
-    Blockly.JavaScript['hc_sr04_distance']=b=>{
-      const trigPin = Blockly.JavaScript.valueToCode(b,'TRIG_PIN',0) || '2';
-      const echoPin = Blockly.JavaScript.valueToCode(b,'ECHO_PIN',0) || '3';
-      return [`readHCSR04(${trigPin}, ${echoPin})`, 0];
-    };
-    
-    Blockly.JavaScript['sharp_gp2y0a21_distance']=b=>{
-      const pin = Blockly.JavaScript.valueToCode(b,'PIN',0) || '0';
-      return [`readSharpGP2Y0A21(${pin})`, 0];
-    };
-    
-    Blockly.JavaScript['hlk_ld2410s_human_detect']=b=>{
-      const rxPin = Blockly.JavaScript.valueToCode(b,'RX_PIN',0) || '16';
-      const txPin = Blockly.JavaScript.valueToCode(b,'TX_PIN',0) || '17';
-      return [`readHLKLD2410S(${rxPin}, ${txPin})`, 0];
-    };
-    
-    Blockly.JavaScript['hlk_ld2420_human_detect']=b=>{
-      const rxPin = Blockly.JavaScript.valueToCode(b,'RX_PIN',0) || '16';
-      const txPin = Blockly.JavaScript.valueToCode(b,'TX_PIN',0) || '17';
-      return [`readHLKLD2420(${rxPin}, ${txPin})`, 0];
-    };
-    
-    Blockly.JavaScript['tof_vl53l0x_distance']=b=>{
-      return [`readVL53L0X()`, 0];
-    };
-    
-    Blockly.JavaScript['tof_vl53l1x_distance']=b=>{
-      return [`readVL53L1X()`, 0];
-    };
-
-    // Touch Sensor Generator
-    Blockly.Arduino['touch_sensor'] = function(block) {
-      var pin = block.getFieldValue('PIN');
-      var code = 'digitalRead(' + pin + ')';
-      return [code, Blockly.Arduino.ORDER_ATOMIC];
-    };
-
-    // Capacitive Touch Generator
-    Blockly.Arduino['capacitive_touch'] = function(block) {
-      var touchPin = block.getFieldValue('TOUCH_PIN');
-      var code = 'touchRead(' + touchPin + ')';
-      return [code, Blockly.Arduino.ORDER_ATOMIC];
-    };
-
-    // Push Button Generator
-    Blockly.Arduino['push_button'] = function(block) {
-      var pin = block.getFieldValue('PIN');
-      var code = '!digitalRead(' + pin + ')';
-      return [code, Blockly.Arduino.ORDER_ATOMIC];
-    };
-
-    // Toggle Switch Generator
-    Blockly.Arduino['toggle_switch'] = function(block) {
-      var pin = block.getFieldValue('PIN');
-      var code = 'digitalRead(' + pin + ')';
-      return [code, Blockly.Arduino.ORDER_ATOMIC];
-    };
-
-    // Vibration Sensor Generator
-    Blockly.Arduino['vibration_sensor'] = function(block) {
-      var pin = block.getFieldValue('PIN');
-      var code = 'digitalRead(' + pin + ')';
-      return [code, Blockly.Arduino.ORDER_ATOMIC];
-    };
-
-    // Tilt Sensor Generator
-    Blockly.Arduino['tilt_sensor'] = function(block) {
-      var pin = block.getFieldValue('PIN');
-      var code = 'digitalRead(' + pin + ')';
-      return [code, Blockly.Arduino.ORDER_ATOMIC];
-    };
-
-    // Knock Sensor Generator
-    Blockly.Arduino['knock_sensor'] = function(block) {
-      var pin = block.getFieldValue('PIN');
-      var code = 'digitalRead(' + pin + ')';
-      return [code, Blockly.Arduino.ORDER_ATOMIC];
-    };
-
-    // Pressure Pad Generator
-    Blockly.Arduino['pressure_pad'] = function(block) {
-      var pin = block.getFieldValue('PIN');
-      var code = 'digitalRead(' + pin + ')';
-      return [code, Blockly.Arduino.ORDER_ATOMIC];
-    };
-
-    /* ====== Gerçek cihaz kodlarını bağlamak istersen:
-       - Örn. move_forward: Blockly.JavaScript['move_forward'] = () => `YOUR_CODE\n`;
-       - runCode() içindeki fetch'i kendi endpoint'inle aç.
-    ====== */
-  </script>
+        function loadProject() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        try {
+                            const projectData = JSON.parse(e.target.result);
+                            clearCanvas();
+                            
+                            projectData.blocks.forEach(blockData => {
+                                createDroppedBlock(blockData.type, blockData.x, blockData.y);
+                            });
+                            
+                            alert('Proje başarıyla yüklendi!');
+                        } catch (error) {
+                            alert('Proje dosyası okunamadı: ' + error.message);
+                        }
+                    };
+                    reader.readAsText(file);
+                }
+            };
+            input.click();
+        }
+    </script>
 </body>
 </html>
