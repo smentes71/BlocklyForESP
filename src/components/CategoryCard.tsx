@@ -1,6 +1,8 @@
 import React from 'react';
-import { Edit2, Trash2, Zap } from 'lucide-react';
+import { Edit2, Trash2, Zap, Radar, ChevronDown, ChevronUp } from 'lucide-react';
 import { Category } from '../types/category';
+
+const { useState } = React;
 
 interface CategoryCardProps {
   category: Category;
@@ -9,10 +11,14 @@ interface CategoryCardProps {
 }
 
 export const CategoryCard: React.FC<CategoryCardProps> = ({ category, onEdit, onDelete }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+
   const getIconComponent = (iconName: string) => {
     switch (iconName) {
       case 'zap':
         return <Zap className="w-8 h-8" />;
+      case 'radar':
+        return <Radar className="w-8 h-8" />;
       default:
         return <Zap className="w-8 h-8" />;
     }
@@ -49,6 +55,36 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({ category, onEdit, on
           </div>
         </div>
         <p className="text-gray-600 text-sm leading-relaxed">{category.description}</p>
+        
+        {category.sensors && category.sensors.length > 0 && (
+          <div className="mt-4">
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="flex items-center justify-between w-full p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-all"
+            >
+              <span className="text-sm font-medium text-gray-700">
+                Sensörler ({category.sensors.length})
+              </span>
+              {isExpanded ? (
+                <ChevronUp className="w-4 h-4 text-gray-500" />
+              ) : (
+                <ChevronDown className="w-4 h-4 text-gray-500" />
+              )}
+            </button>
+            
+            {isExpanded && (
+              <div className="mt-3 space-y-2">
+                {category.sensors.map((sensor) => (
+                  <div key={sensor.id} className="p-3 bg-white border border-gray-100 rounded-lg">
+                    <h4 className="font-medium text-gray-900 text-sm">{sensor.name}</h4>
+                    <p className="text-xs text-gray-600 mt-1">{sensor.description}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+        
         <div className="mt-4 pt-4 border-t border-gray-100">
           <div className="flex justify-between text-xs text-gray-500">
             <span>Created: {category.createdAt.toLocaleDateString()}</span>

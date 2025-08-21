@@ -4,8 +4,15 @@ export interface Category {
   icon: string;
   description: string;
   itemCount: number;
+  sensors?: Sensor[];
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface Sensor {
+  id: string;
+  name: string;
+  description: string;
 }
 
 export interface CategoryFormData {

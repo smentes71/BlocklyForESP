@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Zap } from 'lucide-react';
+import { X, Zap, Radar } from 'lucide-react';
 import { Category, CategoryFormData } from '../types/category';
 
 interface CategoryFormProps {
@@ -18,7 +18,7 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
   const [formData, setFormData] = useState<CategoryFormData>({
     name: '',
     description: '',
-    icon: 'zap'
+    icon: 'radar'
   });
 
   useEffect(() => {
@@ -32,7 +32,7 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
       setFormData({
         name: '',
         description: '',
-        icon: 'zap'
+        icon: 'radar'
       });
     }
   }, [editingCategory, isOpen]);
@@ -93,11 +93,29 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Icon
             </label>
-            <div className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg">
-              <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg text-white">
-                <Zap className="w-5 h-5" />
+            <div className="space-y-2">
+              <div 
+                className={`flex items-center space-x-3 p-3 border rounded-lg cursor-pointer transition-all ${
+                  formData.icon === 'zap' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
+                }`}
+                onClick={() => setFormData({ ...formData, icon: 'zap' })}
+              >
+                <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg text-white">
+                  <Zap className="w-5 h-5" />
+                </div>
+                <span className="text-gray-700">Lightning (Zap) - Analog/Digital Control</span>
               </div>
-              <span className="text-gray-700">Lightning (Zap)</span>
+              <div 
+                className={`flex items-center space-x-3 p-3 border rounded-lg cursor-pointer transition-all ${
+                  formData.icon === 'radar' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
+                }`}
+                onClick={() => setFormData({ ...formData, icon: 'radar' })}
+              >
+                <div className="p-2 bg-gradient-to-br from-green-500 to-teal-600 rounded-lg text-white">
+                  <Radar className="w-5 h-5" />
+                </div>
+                <span className="text-gray-700">Radar - Distance/Proximity Sensors</span>
+              </div>
             </div>
           </div>
 
